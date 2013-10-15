@@ -31,4 +31,11 @@ TestFunction PROC
 	ret
 TestFunction ENDP
 
+CorrectGamma PROC bitmap : DWORD, size: DWORD, gamma: QWORD
+	
+loop:
+	
+	ret
+CorrectGamma ENDP
+
 END DllEntry 

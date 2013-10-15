@@ -17,10 +17,17 @@ BOOLEAN WINAPI DllMain( IN HINSTANCE hDllHandle,
  }
 
 #include <iostream>
+#include <math.h>
 
-extern "C"{
-	void __declspec(dllexport) __cdecl CorrectGamma()
+typedef unsigned char byte;
+
+extern "C"
+{
+	void __declspec(dllexport) __cdecl CorrectGamma(byte bitmap[], int size, double gamma)
 	{
-		std::cout << "dupa;";
+		for (int i = 0; i < size; i++)
+		{
+			bitmap[i] = static_cast<byte>((static_cast<double>(bitmap[i]), gamma));
+		}
 	}
 }
