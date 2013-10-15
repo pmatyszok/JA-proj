@@ -2,12 +2,27 @@
 *.slo
 *.lo
 *.o
+*.obj
 
 # Compiled Dynamic libraries
 *.so
 *.dylib
+*.dll
 
 # Compiled Static libraries
 *.lai
 *.la
 *.a
+
+#VS specific
+*.sdf
+*.suo
+*.user
+*.tlog
+*.pdb
+*.lastbuildstate
+*.log
+*.manifest
+*.idb
+*.suo
+*.user
