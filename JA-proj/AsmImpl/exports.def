@@ -1,0 +1,3 @@
+LIBRARY "AsmImpl"
+EXPORTS
+TestFunction

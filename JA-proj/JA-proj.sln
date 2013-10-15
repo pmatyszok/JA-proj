@@ -3,10 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JA-proj", "JA-proj\JA-proj.vcxproj", "{1BB2373E-4474-4A73-869E-F304E3C63F9D}"
 	ProjectSection(ProjectDependencies) = postProject
+		{E197ED51-0997-4241-B086-5532EC29E5AC} = {E197ED51-0997-4241-B086-5532EC29E5AC}
 		{FF7654FF-F7B7-47E9-9FE7-DA25C504A209} = {FF7654FF-F7B7-47E9-9FE7-DA25C504A209}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CppImpl", "CppImpl\CppImpl.vcxproj", "{FF7654FF-F7B7-47E9-9FE7-DA25C504A209}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AsmImpl", "AsmImpl\AsmImpl.vcxproj", "{E197ED51-0997-4241-B086-5532EC29E5AC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,6 +25,10 @@ Global
 		{FF7654FF-F7B7-47E9-9FE7-DA25C504A209}.Debug|Win32.Build.0 = Debug|Win32
 		{FF7654FF-F7B7-47E9-9FE7-DA25C504A209}.Release|Win32.ActiveCfg = Release|Win32
 		{FF7654FF-F7B7-47E9-9FE7-DA25C504A209}.Release|Win32.Build.0 = Release|Win32
+		{E197ED51-0997-4241-B086-5532EC29E5AC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E197ED51-0997-4241-B086-5532EC29E5AC}.Debug|Win32.Build.0 = Debug|Win32
+		{E197ED51-0997-4241-B086-5532EC29E5AC}.Release|Win32.ActiveCfg = Release|Win32
+		{E197ED51-0997-4241-B086-5532EC29E5AC}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
