@@ -31,10 +31,23 @@ TestFunction PROC
 	ret
 TestFunction ENDP
 
-CorrectGamma PROC bitmap : DWORD, size: DWORD, gamma: QWORD
+CorrectGamma PROC bitmap : DWORD, arrsize: DWORD, gamma: QWORD
+	push ebp
+	mov ebp, esp
+	;mov eax, dword ptr bitmap
+	add eax, arrsize
+	mov ecx, eax 
 	
-loop:
-	
+	lea ebx, bitmap
+	main_loop:
+		push cx	;preserving loop var
+		mov eax, ebx
+		add eax, 10
+		mov ebx, eax
+		lea ebx, [ebx+1]
+		pop cx	;preserving loop var
+	loop main_loop
+	leave
 	ret
 CorrectGamma ENDP
 
