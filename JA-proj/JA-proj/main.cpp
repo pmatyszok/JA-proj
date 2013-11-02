@@ -5,9 +5,9 @@
 #include <assert.h>
 using namespace std;
 
-typedef void __declspec(dllimport) (*__cdecl gamma)(unsigned char*, int, double);
+typedef void __declspec(dllimport) (*__cdecl gamma)(unsigned char*, int, float);
 
-typedef void __declspec(dllimport) (*__stdcall gamma2)(unsigned char*, int, double);
+typedef void __declspec(dllimport) (*__cdecl gamma2)(unsigned char*, int, float);
 struct bmpfile_magic 
 {
   WORD bfType;
@@ -35,6 +35,11 @@ struct info
 	DWORD rotation_1;
 };
 
+__declspec(noinline) int nic(int a, int b, int d)
+{
+	return a + b+ d;
+}
+
 int main()
 {
 	HMODULE lib = LoadLibrary("CppImpl.dll");
@@ -50,6 +55,9 @@ int main()
 	if (fun2 == NULL)
 		return -4;
 
+	int a;
+	a = nic(4, 5, 6);
+	cout << a;
 	const string file = "C:\\Users\\Pawel\\Desktop\\JA-proj\\JA-proj\\Debug\\test.bmp";
 	fstream fh;
 	fh.open(file, ios::in | ios::ate | ios::binary);
@@ -82,13 +90,14 @@ int main()
 	//	int a;
 	//	cin >> a;
 	//}
-	fun(data,  size-(ifstream::pos_type)54, 0.4);
+	float gamma = 2.0f;
+	//fun(data,  size-(ifstream::pos_type)54, gamma);
 	fh.write((char*)&header, sizeof(header));
 	fh.write((char*)&info, sizeof(info));
 	fh.write((char*)data,  size-(ifstream::pos_type)54);
 	fh.close();
-	
-	fun2(data, size-(ifstream::pos_type)54, 0.4);
+
+	fun2(data, size-(ifstream::pos_type)54, gamma);
 	int ay;
 	cin >> ay;
 	if (lib != NULL)

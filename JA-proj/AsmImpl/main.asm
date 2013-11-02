@@ -1,20 +1,20 @@
 .386 
 
-.MODEL FLAT, STDCALL
+.MODEL FLAT, C
 
 
 OPTION CASEMAP:NONE
-
+.nolist
 INCLUDE    \masm32\include\windows.inc 
 INCLUDE		\masm32\include\user32.inc
 INCLUDELIB	\masm32\lib\user32.lib
-
+.list
 .DATA
 Smth	DB	"Test2", 0
 Result	QWORD	?
 .CODE
 
-DllEntry PROC hInstDLL:HINSTANCE, reason:DWORD, reserved1:DWORD
+DllEntry PROC  hInstDLL:HINSTANCE, reason:DWORD, reserved1:DWORD
 
 	mov eax, TRUE 
 	ret
@@ -27,26 +27,99 @@ DllEntry ENDP
 ;-------------------------------------------------------------------------
 
 TestFunction PROC
-	invoke MessageBox, NULL, ADDR Smth, ADDR Smth, MB_OK
+	;invoke MessageBox, NULL, ADDR Smth, ADDR Smth, MB_OK
 	ret
 TestFunction ENDP
 
-CorrectGamma PROC bitmap : DWORD, arrsize: DWORD, gamma: QWORD
+
+CorrectGamma PROC C bitmap : DWORD, arrsize: DWORD, gamma: DWORD
 	push ebp
 	mov ebp, esp
-	;mov eax, dword ptr bitmap
-	add eax, arrsize
-	mov ecx, eax 
+	push esi
 	
-	lea ebx, bitmap
-	main_loop:
-		push cx	;preserving loop var
-		mov eax, ebx
-		add eax, 10
-		mov ebx, eax
-		lea ebx, [ebx+1]
-		pop cx	;preserving loop var
-	loop main_loop
+	;
+	;Params access:
+	;bitmap first element is ebp + 12
+	;bitmap size is ebp + 16
+	;gamma is ebp + 20
+	;
+
+	sub esp, 24
+
+	;
+	;local vars:
+	;first - esp + 4
+	;second - esp + 8
+	;third - esp + 12
+	;
+
+	finit
+
+	;
+	;loads data from array
+	;
+	mov ebx, dword ptr[ebp + 12]
+	;mov byte ptr [ebx], 122
+	
+	;
+	;loads converted data to FPU
+	;
+	movzx eax, byte ptr[ebx]
+	mov dword ptr[esp + 8], eax
+	xor eax, eax
+	mov eax, 255
+	mov dword ptr[esp + 12], eax
+	fild dword ptr[esp + 12]
+	fild dword ptr[esp + 8]
+	fdiv st(0), st(1)
+	fstp st(1)
+	;
+	;Loads gamma to FPU
+	;
+	mov eax, dword ptr[ebp + 20]
+	mov dword ptr[esp + 4], eax
+	fld dword ptr[esp + 4]
+
+	fxch
+	
+
+	fyl2x
+	; now st0 = y*log2(x)
+	
+	fld st
+	frndint
+	;now st0 = int[y*log2(x)] and st1 = y*log2(x)
+
+	fsub st(1), st
+	fxch
+	;now st0 has the fractional part, st1 has the integral part
+	
+	f2xm1
+	;st0 = 2^st0 - 1, st1 - integral part
+
+	fld1
+	fadd
+	;st = 2^st0 
+	fscale
+	; st = x^y !!!
+	fstp st(1)
+	fild dword ptr[esp + 12]
+	fmul st(0), st(1)
+	;pixels are integer number, so rounding rules apply
+	;we will retrive control word, save if for later, modify
+	;retrive our integer, load old cword and its done
+
+	fnstcw word ptr[esp + 12]
+	movzx eax, word ptr[esp + 12]
+	or eax, 0C00h ; set Rounding Control bits to 11 = truncate (towards 0)
+	mov dword ptr[esp + 16], eax
+	fldcw word ptr[esp + 16]
+	fistp dword ptr[esp + 4]
+	fldcw word ptr[esp + 12]
+	mov cl, byte ptr[esp + 4]
+	mov byte ptr[ebx], cl
+
+	pop esi
 	leave
 	ret
 CorrectGamma ENDP
