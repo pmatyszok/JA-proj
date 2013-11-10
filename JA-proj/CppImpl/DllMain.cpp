@@ -25,12 +25,13 @@ typedef unsigned char byte;
 extern "C"
 {
 	using namespace std;
-	void __declspec(dllexport) __cdecl CorrectGamma(byte bitmap[], int size, float gamma)
+	void __declspec(dllexport) __cdecl CorrectGamma(unsigned char* bitmap, int size, float gamma)
 	{
 		for (int i = 0; i < size; i++)
 		{
 			byte pixel = bitmap[i];
 			bitmap[i] = static_cast<byte>(pow((float)pixel / (float)255, gamma) * (float)255);
+			
 		}
 	}
 }

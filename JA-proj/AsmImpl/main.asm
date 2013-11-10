@@ -112,8 +112,6 @@ CorrectGamma PROC C bitmap : DWORD, arrsize: DWORD, gamma: DWORD
 		fistp dword ptr[esp + 8]
 		fldcw word ptr[esp + 20]
 
-
-
 		;transfer value
 		mov cl, byte ptr[esp + 8]
 		mov byte ptr[ebx], cl
@@ -124,7 +122,7 @@ CorrectGamma PROC C bitmap : DWORD, arrsize: DWORD, gamma: DWORD
 	jne main_loop
 
 	leave
-	ret
+	ret 
 CorrectGamma ENDP
 
 END DllEntry 
