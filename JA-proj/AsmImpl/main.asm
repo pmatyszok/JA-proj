@@ -22,8 +22,8 @@ DllEntry PROC  hInstDLL:HINSTANCE, reason:DWORD, reserved1:DWORD
 DllEntry ENDP
 
 CorrectGamma PROC C bitmap : DWORD, arrsize: DWORD, gamma: DWORD
-	push ebp
-	mov ebp, esp
+	push ebp ;create function stack-frame
+	mov ebp, esp ; save return adress
 	
 	;
 	;Params access:
@@ -42,87 +42,95 @@ CorrectGamma PROC C bitmap : DWORD, arrsize: DWORD, gamma: DWORD
 	;fourth - esp + 16
 	;fifth - esp + 20
 	;
-	mov edx, 0
-	;load 255 to memory - needed to rescale pixels
-	mov eax, 255
-	mov dword ptr[esp + 12], eax
-	main_loop:
-		finit
+
+	mov edx, 0 ; loop counter
+	
+	mov eax, 255 ;load 255 to memory - needed to rescale pixels
+	mov dword ptr[esp + 12], eax ;transfer 255 to memory so FPU can fetch it
+
+	main_loop: ;main program loop begins
+		
+		finit ; initilize FPU
 		;
 		;loads data from array
 		;
-		mov ebx, dword ptr[ebp + 12]
-		lea ebx, [ebx + edx]
+		mov ebx, dword ptr[ebp + 12] ;loads array first element
+		lea ebx, [ebx + edx] ;loads effective addres of curren array element
+		
 		;
 		;load byte, fill with zeros to make FPU-edible
 		;
-		movzx eax, byte ptr[ebx]
+		movzx eax, byte ptr[ebx] ;loads byte and aligns it with zeros
 
-		;byte to memory - fpu eats from memory, not from register
-		mov dword ptr[esp + 8], eax
+		
+		mov dword ptr[esp + 8], eax ;move current byte to memory - fpu takes from memory, not from register
 	
 		;rescale pixel
-		fild dword ptr[esp + 12]
-		fild dword ptr[esp + 8]
-		fdiv st(0), st(1)
+
+		fild dword ptr[esp + 12] ;load 255 to FPU
+		fild dword ptr[esp + 8] ;load current byte to FPU
+		fdiv st(0), st(1) ;rescale pixel to 0-1
+		
+		fld dword ptr[ebp + 20] ;Loads gamma value to FPU
 
 		;
-		;Loads gamma to FPU
+		; pow() implementation begins
 		;
-		fld dword ptr[ebp + 20]
-
-		;because fyl2x needs them in order: x, y (to perform x^y)
-		fxch
+		
+		fxch ;exchange st0 with st1 because fyl2x needs them in order: x, y (to perform x^y)
 	
 
-		fyl2x
-		; now st0 = y*log2(x)
+		fyl2x		; now st0 = y*log2(x)
 	
-		fld st
-		frndint
-		;now st0 = int[y*log2(x)] and st1 = y*log2(x)
+		fld st	;duplicate st0, so st0 = st1
+		frndint	;now st0 = int[y*log2(x)] and st1 = y*log2(x)
 
-		fsub st(1), st
-		fxch
-		;now st0 has the fractional part, st1 has the integral part
+		fsub st(1), st ; st0 has integral part, st1 is fractional part
+		fxch		;now st0 has the fractional part, st1 has the integral part
 	
-		f2xm1
-		;st0 = 2^st0 - 1, st1 - integral part
+		f2xm1		;st0 = 2^st0 - 1, st1 - integral part
 
-		fld1
-		fadd
-		;st = 2^st0 
-		fscale
-		; st = x^y !!!
+		fld1	;load 1 to FPU
+		fadd	;st = 2^st0 
+		fscale  ; st = x^y !!! 
 
+		;
+		; pow() implementation ends
+		;
+
+		;
 		;rescale pixel back to 0-255 range
-		fild dword ptr[esp + 12]
-		fmul 
+		;
+
+		fild dword ptr[esp + 12] ;load 255 to FPU
+		fmul				     ;st0 is calculated pixel value in 0-255 range again
 		
 		
 		;pixels are integer number, so rounding rules apply
 		;we will retrive control word, save if for later, modify
 		;retrive our integer, load old cword and its done
 
-		fnstcw word ptr[esp + 20]
-		movzx eax, word ptr[esp + 20]
+		fnstcw word ptr[esp + 20] ;retrive control word, store it in memory
+		movzx eax, word ptr[esp + 20] ;transfer control word to acumulator, align it with zeroes
 		or eax, 0C00h ; set Rounding Control bits to 11 = truncate (towards 0)
-		mov dword ptr[esp + 16], eax
-		fldcw word ptr[esp + 16]
-		fistp dword ptr[esp + 8]
-		fldcw word ptr[esp + 20]
+		mov dword ptr[esp + 16], eax ; save modified control word in memory
+		fldcw word ptr[esp + 16] ; load modified control word to FPU
+		fistp dword ptr[esp + 8] ; retrive calculated integer pixel value to memory
+		fldcw word ptr[esp + 20] ; load unmodified (old) control word back to FPU
 
-		;transfer value
-		mov cl, byte ptr[esp + 8]
-		mov byte ptr[ebx], cl
+		;
+		;transfer back to image
+		;
+		mov cl, byte ptr[esp + 8] ; move lest significant bits of retrivied pixel value to cl
+		mov byte ptr[ebx], cl	  ;store it in its place in image
 		
-		add edx, 1
-		mov eax, dword ptr[ebp + 16]
-		cmp edx, eax
-	jne main_loop
+		add edx, 1 ;increase loop variable
+		mov eax, dword ptr[ebp + 16]  ;load array size
+		cmp edx, eax ; compare current loop variable with array size
+	jne main_loop ; if size is not reached - continue loop
 
-	leave
-	ret 
+	leave ;clean up stack frame
+	ret ;return
 CorrectGamma ENDP
 
 END DllEntry 
