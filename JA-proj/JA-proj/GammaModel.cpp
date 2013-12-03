@@ -29,20 +29,23 @@ void GammaModel::load_image(string path)
 	fh.open(file, ios::in | ios::ate | ios::binary);
 	if (!fh.is_open())
 		throw "cannot open file";
-	long beg, end;
+
 	ifstream::pos_type size;
 	size = fh.tellg();
 	fh.seekg(0, ios::beg);
 	
-	
+	//bmp header loading
 	fh.read(reinterpret_cast<char*>(&header), sizeof(header));
 	cout<<header.bfSize << endl;
 	cout.flush();
 	
+
 	fh.read(reinterpret_cast<char*>(&info), sizeof(info));
+	//cheks if this is correct bmp file
 	assert(sizeof(info) + sizeof(header) == 54);
 	fh.seekg(0, ios::beg);
 	fh.seekg(54);
+	//size without header
 	actualSize = size-(ifstream::pos_type)54;
 	data = new unsigned char[actualSize];
 
@@ -63,17 +66,20 @@ results GammaModel::run_in_multiple_threads(wrapper funct, unsigned char* data, 
 	HANDLE* threads = new
 		HANDLE[thread_no];
 
+	//prepare arguments for each thread
 	arguments* args = new arguments[thread_no];
 	fill(args, args + thread_no, arguments());
+	//fill results struct
 	res.threads = thread_no;
 	res.gamma = gamma;
+
 	for (int i = 0; i < thread_no; i++)
 	{
 		args[i].thisptr = this;
 		args[i].size = 0;
 		args[i].data = data;
 		if (args[i].size + chunk <= size)
-		{
+		{//handles image division across threads
 			args[i].size = chunk;
 			args[i].data += i * chunk;
 		}
@@ -92,6 +98,7 @@ results GammaModel::run_in_multiple_threads(wrapper funct, unsigned char* data, 
 	DWORD time = GetTickCount();
 	/*
 		Parrallel execution!
+		Time measuring starts!
 	*/
 
 	for (int i = 0; i < thread_no; i++)
@@ -99,13 +106,18 @@ results GammaModel::run_in_multiple_threads(wrapper funct, unsigned char* data, 
 		ResumeThread(threads[i]);
 	}
 
+	/*
+		Parrallel execution ends!
+		Time measuring stops!
+	*/
+
 	int t = WaitForMultipleObjects(thread_no, threads, TRUE, INFINITE);
 
 	time = GetTickCount() - time;
 	clock_t = clock() - clock_t;
 
 
-	//cout << "Thread amount: " << thread_no << endl;
+	cout << "Thread amount: " << thread_no << endl;
 	cout << "Clock: " << clock_t << endl;
 	cout << "GetTickCount: " << time << endl;
 	res.ticks = time;
@@ -116,7 +128,9 @@ results GammaModel::run_in_multiple_threads(wrapper funct, unsigned char* data, 
 
 int GammaModel::get_optimal_thread_amount()
 {
-	return 8;
+	SYSTEM_INFO sys;
+	GetSystemInfo(&sys);
+	return sys.dwNumberOfProcessors;
 }
 
 int GammaModel::init()

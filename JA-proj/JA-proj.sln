@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CppImpl", "CppImpl\CppImpl.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AsmImpl", "AsmImpl\AsmImpl.vcxproj", "{E197ED51-0997-4241-B086-5532EC29E5AC}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Install", "Install\Install.vdproj", "{06EE4BE7-A00A-4EEC-B0B2-617437E03BA9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -29,6 +31,8 @@ Global
 		{E197ED51-0997-4241-B086-5532EC29E5AC}.Debug|Win32.Build.0 = Debug|Win32
 		{E197ED51-0997-4241-B086-5532EC29E5AC}.Release|Win32.ActiveCfg = Release|Win32
 		{E197ED51-0997-4241-B086-5532EC29E5AC}.Release|Win32.Build.0 = Release|Win32
+		{06EE4BE7-A00A-4EEC-B0B2-617437E03BA9}.Debug|Win32.ActiveCfg = Debug
+		{06EE4BE7-A00A-4EEC-B0B2-617437E03BA9}.Release|Win32.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
